@@ -51,6 +51,13 @@ public class UnitMultiplication {
     }
 
     public static class MultiplicationReducer extends Reducer<Text, Text, Text, Text> {
+        private float beta;
+
+        @Override
+        public void setUp(Context context) {
+            Configuration config = context.getConfiguration();
+            beta = config.getFloat("beta", 0.2f);
+        }
 
 
         @Override
@@ -72,7 +79,7 @@ public class UnitMultiplication {
             for (String cell : transitonCell) {
                 String outputKey = cell.split("=")[0];
                 double prob = Double.parseDouble(cell.split("=")[1]);
-                String outputVal = String.valueOf(prob * prCell);
+                String outputVal = String.valueOf(prob * prCell * (1 - beta));
                 context.write(new Text(outputKey), new Text(outputVal));
             }
         }
