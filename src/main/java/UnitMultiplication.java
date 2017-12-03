@@ -66,17 +66,17 @@ public class UnitMultiplication {
 
             //input key = fromPage value=<toPage=probability..., pageRank>
             //target: get the unit multiplication
-            List<String> transitonCell = new ArrayList<>();
+            List<String> transitionCell = new ArrayList<String>();
             double prCell = 0;
             for (Text val : values) {
                 String valStr = val.toString();
                 if (valStr.contains("=")) {
-                    transitonCell.add(valStr);
+                    transitionCell.add(valStr);
                 } else {
                     prCell = Double.parseDouble(valStr);
                 }
             }
-            for (String cell : transitonCell) {
+            for (String cell : transitionCell) {
                 String outputKey = cell.split("=")[0];
                 double prob = Double.parseDouble(cell.split("=")[1]);
                 String outputVal = String.valueOf(prob * prCell * (1 - beta));
