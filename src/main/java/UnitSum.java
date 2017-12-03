@@ -28,11 +28,11 @@ public class UnitSum {
         }
     }
 
-    public static class betaMapper extends Mapper<Object, Text, Text, DoubleWritable> {
+    public static class BetaMapper extends Mapper<Object, Text, Text, DoubleWritable> {
         private float beta;
 
         @Override
-        public void setUp(Context context) {
+        public void setup(Context context) {
             Configuration config = context.getConfiguration();
             beta  = config.getFloat("beta", 0.2f);
         }
@@ -64,6 +64,7 @@ public class UnitSum {
     public static void main(String[] args) throws Exception {
 
         Configuration conf = new Configuration();
+        conf.setFloat("beta", Float.parseFloat(args[3]));
         Job job = Job.getInstance(conf);
         job.setJarByClass(UnitSum.class);
 
@@ -73,8 +74,10 @@ public class UnitSum {
         job.setReducerClass(SumReducer.class);
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(DoubleWritable.class);
-        FileInputFormat.addInputPath(job, new Path(args[0]));
-        FileOutputFormat.setOutputPath(job, new Path(args[1]));
+        MultipleInputs.addInputPath(job, new Path(args[0]), TextInputFormat.class, PassMapper.class);
+        MultipleInputs.addInputPath(job, new Path(args[1]), TextInputFormat.class, BetaMapper.class);
+
+        FileOutputFormat.setOutputPath(job, new Path(args[2]));
         job.waitForCompletion(true);
     }
 }

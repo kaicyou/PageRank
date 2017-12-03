@@ -54,7 +54,7 @@ public class UnitMultiplication {
         private float beta;
 
         @Override
-        public void setUp(Context context) {
+        public void setup(Context context) {
             Configuration config = context.getConfiguration();
             beta = config.getFloat("beta", 0.2f);
         }
@@ -71,7 +71,7 @@ public class UnitMultiplication {
             for (Text val : values) {
                 String valStr = val.toString();
                 if (valStr.contains("=")) {
-                    transitonCell.add(valStr)
+                    transitonCell.add(valStr);
                 } else {
                     prCell = Double.parseDouble(valStr);
                 }
@@ -88,6 +88,7 @@ public class UnitMultiplication {
     public static void main(String[] args) throws Exception {
 
         Configuration conf = new Configuration();
+        conf.setFloat("beta", Float.parseFloat(args[3]));
         Job job = Job.getInstance(conf);
         job.setJarByClass(UnitMultiplication.class);
 
