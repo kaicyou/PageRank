@@ -22,6 +22,19 @@ public class UnitMultiplication {
 
             //input format: fromPage\t toPage1,toPage2,toPage3
             //target: build transition matrix unit -> fromPage\t toPage=probability
+            String line = value.toString().trim();
+            String[] fromTo = line.split("\t");
+            
+            // bad import
+            if (fromTo.length < 2 || fromTo[1].trim().equals("")) {
+                return;
+            }
+
+            String from = fromTo[0];
+            String[] tos = fromTo[1].split(",");
+            for (String toStr : tos) {
+                context.write(new Text(from), new Text(toStr + "=" + (double)1 / tos.length));
+            }
         }
     }
 
@@ -32,6 +45,8 @@ public class UnitMultiplication {
 
             //input format: Page\t PageRank
             //target: write to reducer
+            String[] pr = value.toString().trim().split("\t");
+            context.write(new Text(pr[0]), new Text(pr[1]));
         }
     }
 
@@ -44,6 +59,22 @@ public class UnitMultiplication {
 
             //input key = fromPage value=<toPage=probability..., pageRank>
             //target: get the unit multiplication
+            List<String> transitonCell = new ArrayList<>();
+            double prCell = 0;
+            for (Text val : values) {
+                String valStr = val.toString();
+                if (valStr.contains("=")) {
+                    transitonCell.add(valStr)
+                } else {
+                    prCell = Double.parseDouble(valStr);
+                }
+            }
+            for (String cell : transitonCell) {
+                String outputKey = cell.split("=")[0];
+                double prob = Double.parseDouble(cell.split("=")[1]);
+                String outputVal = String.valueOf(prob * prCell);
+                context.write(new Text(outputKey), new Text(outputVal));
+            }
         }
     }
 
@@ -54,6 +85,8 @@ public class UnitMultiplication {
         job.setJarByClass(UnitMultiplication.class);
 
         //how chain two mapper classes?
+        ChainMapper.addMapper(job, TransitionMapper.class, Object.class, Text.class, Text.class, Text.class, conf);
+        ChainMapper.addMapper(job, PRMapper.class, Object.class, Text.class, Text.class, Text.class, conf);
 
         job.setReducerClass(MultiplicationReducer.class);
 
